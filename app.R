@@ -21,6 +21,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     useShinyjs(),
+    
     tabItems(
       tabItem(
         tabName = "Files",
@@ -31,11 +32,15 @@ ui <- dashboardPage(
       tabItem(
         tabName = "Lipidomics",
         fluidRow(
+          # buttons to show/hide boxes
           checkboxGroupButtons(inputId = "showPlots",
                                label = "",
                                choices = c("Histogram" = "histogram",
-                                           "Controls" = "histogram_control"),
-                               selected = "histogram")
+                                           "Histogram with controls" = "histogram2"),
+                               selected = "histogram",
+                               status = "info",
+                               justified = TRUE,
+                               width = "60%")
         ),
         fluidRow(
           box(
@@ -43,21 +48,25 @@ ui <- dashboardPage(
             title = "Histogram",
             solidHeader = TRUE,
             status = "primary",
-            plotOutput(outputId = "plot1", 
-                       height = 250)
+            plotOutput(outputId = "plot1")
           ),
           
           box(
-            id = "histogram_control",
-            title = "Controls",
+            id = "histogram2",
+            title = "Histogram with controls",
             solidHeader = TRUE,
             status = "primary",
             collapsible = TRUE,
-            sliderInput(inputId = "slider", 
-                        label = "Number of observations:", 
-                        min = 1, 
-                        max = 100, 
-                        value = 50)
+            plotOutput(outputId = "plot2"),
+            sidebar = boxSidebar(
+              id = "hist_sidebar",
+              width = 40,
+              sliderInput(inputId = "slider",
+                          label = "Number of observations:",
+                          min = 1,
+                          max = 100,
+                          value = 50)
+            )
           )
         )
       ), # end lipidomics
@@ -68,7 +77,7 @@ ui <- dashboardPage(
           box(
             title = "Scatter plot",
             solidHeader = TRUE,
-            plotOutput(outputId = "plot2", 
+            plotOutput(outputId = "plot3", 
                        height = 250)
           ),
         )
@@ -82,6 +91,7 @@ server <- function(input, output, session) {
   set.seed(122)
   histdata <- rnorm(500)
   
+  # toggle hide/show some boxes
   observe({
     shinyjs::toggle(
       id = "histogram",
@@ -89,22 +99,30 @@ server <- function(input, output, session) {
     )
     
     shinyjs::toggle(
-      id = "histogram_control",
-      condition = "histogram_control" %in% input$showPlots
+      id = "histogram2",
+      condition = "histogram2" %in% input$showPlots
     )
   })
   
+  # histogram
   output$plot1 <- renderPlot({
+    hist(histdata)
+  })
+  
+  output$plot2 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
   })
   
-  output$plot2 <- renderPlot({
+  # scatterplot
+  output$plot3 <- renderPlot({
     plot(x = 1:length(histdata), 
          y = histdata)
   })
 }
 
+
+# run everything
 shinyApp(ui = ui, 
          server = server,
          options = list("launch.browser" = TRUE))
