@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyjs)
 library(shinyWidgets)
+library(shinyjqui)
 
 ui <- dashboardPage(
   dashboardHeader(title = "SODA - dashboard"),
@@ -13,10 +14,10 @@ ui <- dashboardPage(
                icon = icon("file-excel")),
       menuItem(text = "Lipidomics", 
                tabName = "Lipidomics", 
-               icon = icon("magnifying-glass-chart")),
+               icon = icon("bar-chart-o")),
       menuItem(text = "Proteomics", 
                tabName = "Proteomics", 
-               icon = icon("magnifying-glass-chart"))
+               icon = icon("bar-chart-o"))
     )
   ),
   dashboardBody(
@@ -43,31 +44,35 @@ ui <- dashboardPage(
                                width = "60%")
         ),
         fluidRow(
-          box(
-            id = "histogram",
-            title = "Histogram",
-            solidHeader = TRUE,
-            status = "primary",
-            plotOutput(outputId = "plot1")
-          ),
-          
-          box(
-            id = "histogram2",
-            title = "Histogram with controls",
-            solidHeader = TRUE,
-            status = "primary",
-            collapsible = TRUE,
-            plotOutput(outputId = "plot2"),
-            sidebar = boxSidebar(
-              id = "hist_sidebar",
-              width = 40,
-              sliderInput(inputId = "slider",
-                          label = "Number of observations:",
-                          min = 1,
-                          max = 100,
-                          value = 50)
+          jqui_sortable(
+            div(
+              id = "movePlots",
+              box(
+                id = "histogram",
+                title = "Histogram",
+                solidHeader = TRUE,
+                status = "primary",
+                plotOutput(outputId = "plot1")
+              ),
+              box(
+                id = "histogram2",
+                title = "Histogram with controls",
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                plotOutput(outputId = "plot2"),
+                sidebar = boxSidebar(
+                  id = "hist_sidebar",
+                  width = 40,
+                  sliderInput(inputId = "slider",
+                              label = "Number of observations:",
+                              min = 1,
+                              max = 100,
+                              value = 50)
+                )
+              )
             )
-          )
+          ) # end jqui_sortable
         )
       ), # end lipidomics
       
@@ -92,6 +97,7 @@ server <- function(input, output, session) {
   histdata <- rnorm(500)
   
   # toggle hide/show some boxes
+  # this can also be done with actionbuttons and shinydashboardplus
   observe({
     shinyjs::toggle(
       id = "histogram",
