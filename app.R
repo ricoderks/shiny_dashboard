@@ -191,13 +191,22 @@ ui <- dashboardPage(
       tabItem(
         tabName = "shinyjquiServer",
         fluidRow(
-          checkboxGroupButtons(inputId = "showPlots4",
-                               label = "Show plots:",
-                               choices = c("Histogram" = "histogram",
-                                           "Histogram with controls" = "histogramCntrl",
-                                           "Plotly" = "plotly"),
-                               selected = c("histogram", "histogramCntrl", "plotly")),
-          p("Can not change order of the plots.")
+          column(
+            width = 4,
+            checkboxGroupButtons(inputId = "showPlots4",
+                                 label = "Show plots:",
+                                 choices = c("Histogram" = "histogram",
+                                             "Histogram with controls" = "histogramCntrl",
+                                             "Plotly" = "plotly"),
+                                 selected = c("histogram", "histogramCntrl", "plotly"))
+          ),
+          column(
+            width = 4,
+            radioGroupButtons(inputId = "moveZoomPlots",
+                              label = "Interaction:",
+                              choices = c("Zoom plotly" = "zoom",
+                                          "Move plots" = "move"))
+          ),
         ), # end fluidrow 1
         uiOutput(outputId = "uiPlots")
       ) # end shinyjqServer
@@ -325,12 +334,16 @@ server <- function(input, output, session) {
   
   # plotly plot
   output$plotlyPlot4 <- renderPlotly({
+    # needed to make the plotly graph resize with the size of the box
     req(input$showPlots4)
     
     plotly_data |>
       plot_ly(x = ~x,
               y = ~y) |>
-      add_markers()  
+      add_markers() |> 
+      config(displayModeBar = input$moveZoomPlots == "zoom") |> 
+      layout(xaxis = list(fixedrange = input$moveZoomPlots == "move"), 
+             yaxis = list(fixedrange = input$moveZoomPlots == "move"))
   })
   
   # calculate the width
@@ -354,57 +367,72 @@ server <- function(input, output, session) {
     tagList(
       fluidRow(
         # show plots
-        if("histogram" %in% input$showPlots4) {
-          box(
-            id = "histogramBox4",
-            title = "Histogram",
-            width = boxWidth(),
-            solidHeader = TRUE,
-            collapsible = TRUE,
-            status = "primary",
-            plotOutput(outputId = "histPlot4")
-          )
-        } else {
-          NULL
-        }, 
-        if("histogramCntrl" %in% input$showPlots4) {
-          box(
-            id = "histogramCntrlBox4",
-            title = "Histogram with controls",
-            width = boxWidth(),
-            solidHeader = TRUE,
-            status = "primary",
-            collapsible = TRUE,
-            plotOutput(outputId = "histCntrlPlot4"),
-            sidebar = boxSidebar(
-              id = "hist_sidebar4",
-              width = 40,
-              sliderInput(inputId = "slider4",
-                          label = "Number of observations:",
-                          min = 1,
-                          max = 100,
-                          value = 50)
-            ) # end boxSidebar
-          )
-        } else {
-          NULL
-        },
-        if("plotly" %in% input$showPlots4) {
-          box(
-            id = "plotlyBox4",
-            title = "Plotly plot",
-            width = boxWidth(),
-            solidHeader = TRUE,
-            status = "primary",
-            collapsible = TRUE,
-            plotlyOutput(outputId = "plotlyPlot4")
-          )
-        } else {
-          NULL
-        }
+        div(id = "divPlots4",
+            if("histogram" %in% input$showPlots4) {
+              box(
+                id = "histogramBox4",
+                title = "Histogram",
+                width = boxWidth(),
+                solidHeader = TRUE,
+                collapsible = TRUE,
+                status = "primary",
+                plotOutput(outputId = "histPlot4")
+              )
+            } else {
+              NULL
+            }, 
+            if("histogramCntrl" %in% input$showPlots4) {
+              box(
+                id = "histogramCntrlBox4",
+                title = "Histogram with controls",
+                width = boxWidth(),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                plotOutput(outputId = "histCntrlPlot4"),
+                sidebar = boxSidebar(
+                  id = "hist_sidebar4",
+                  width = 40,
+                  sliderInput(inputId = "slider4",
+                              label = "Number of observations:",
+                              min = 1,
+                              max = 100,
+                              value = 50)
+                ) # end boxSidebar
+              )
+            } else {
+              NULL
+            },
+            if("plotly" %in% input$showPlots4) {
+              box(
+                id = "plotlyBox4",
+                title = "Plotly plot",
+                width = boxWidth(),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                plotlyOutput(outputId = "plotlyPlot4")
+              )
+            } else {
+              NULL
+            }
+        )
+        
       ) # end fluidRow 2
-    )
+    ) # end tagList
+  }) # end renderUI
+  
+  observeEvent(input$moveZoomPlots, {
+    
+    if (input$moveZoomPlots == "zoom") {
+      jqui_sortable(ui = "#divPlots4",
+                    operation = "disable")
+    } else {
+      jqui_sortable(ui = "#divPlots4",
+                    operation = "enable")
+    }
   })
+  
 } # end server
 
 
