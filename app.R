@@ -197,15 +197,15 @@ ui <- dashboardPage(
                                            "Histogram with controls" = "histogramCntrl",
                                            "Plotly" = "plotly"),
                                selected = c("histogram", "histogramCntrl", "plotly")),
-          p("test!")
+          p("Can not change order of the plots.")
         ), # end fluidrow 1
         uiOutput(outputId = "uiPlots")
-        
       ) # end shinyjqServer
     ) # end tabitems
   )
 )
 
+#### server function ####
 server <- function(input, output, session) {
   set.seed(122)
   histdata <- rnorm(500)
@@ -237,14 +237,6 @@ server <- function(input, output, session) {
                     condition = "histogramCntrl" %in% input$showPlots3)
     shinyjs::toggle(id = "plotlyBox3",
                     condition = "plotly" %in% input$showPlots3)
-    
-    ## server
-    # shinyjs::toggle(id = "histogramBox4",
-    #                 condition = "histogram" %in% input$showPlots4)
-    # shinyjs::toggle(id = "histogramCntrlBox4",
-    #                 condition = "histogramCntrl" %in% input$showPlots4)
-    # shinyjs::toggle(id = "plotlyBox4",
-    #                 condition = "plotly" %in% input$showPlots4)
   })
   
   
@@ -333,14 +325,17 @@ server <- function(input, output, session) {
   
   # plotly plot
   output$plotlyPlot4 <- renderPlotly({
+    req(input$showPlots4)
+    
     plotly_data |>
       plot_ly(x = ~x,
               y = ~y) |>
-      add_markers() 
+      add_markers()  
   })
   
-  # auto resize
+  # calculate the width
   boxWidth <- reactive({
+    req(input$showPlots4)
     # use observe otherwise I can not see that input$showPlot4 is empty.
     boxWidth <- switch(
       as.character(length(input$showPlots4)),
@@ -352,6 +347,7 @@ server <- function(input, output, session) {
     return(boxWidth)
   })
   
+  # render all plots
   output$uiPlots <- renderUI({
     req(boxWidth)
     
@@ -401,26 +397,18 @@ server <- function(input, output, session) {
             solidHeader = TRUE,
             status = "primary",
             collapsible = TRUE,
-            checkboxInput(inputId = "plotlyPlotZoom4",
-                          label = "Zoom",
-                          value = TRUE),
             plotlyOutput(outputId = "plotlyPlot4")
           )
         } else {
           NULL
         }
-      ) # end fluidrow 2
+      ) # end fluidRow 2
     )
   })
-  
-  # make the plots draggable
-  jqui_draggable(ui = "#histogramBox4, #histogramCntrlBox4, #plotlyBox4",
-                 operation = "enable")
-  
 } # end server
 
 
-# run everything
+#### run everything ####
 shinyApp(ui = ui, 
          server = server,
          options = list("launch.browser" = TRUE))
