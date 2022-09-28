@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)
 library(shinyjqui)
+library(shinyjs)
 library(plotly)
 
 ui <- dashboardPage(
@@ -29,16 +30,18 @@ ui <- dashboardPage(
   
   #### body ####
   dashboardBody(
+    # activate shinyjs
+    useShinyjs(),
     tabItems(
       tabItem(
         tabName = "notMovable",
         fluidRow(
-          actionButton(inputId = "restoreHistogram1",
-                       label = "Histogram"),
-          actionButton(inputId = "restoreHistogramControls1",
-                       label = "Histogram with controls"),
-          actionButton(inputId = "restorePlotly1",
-                       label = "Plotly"),
+          checkboxGroupButtons(inputId = "showPlots1",
+                               label = "Show plots:",
+                               choices = c("Histogram" = "histogram",
+                                           "Histogram with controls" = "histogramCntrl",
+                                           "Plotly" = "plotly"),
+                               selected = c("histogram", "histogramCntrl", "plotly")),
           p("Some times empty space!")
         ), # end fluidrow 1
         fluidRow(
@@ -48,7 +51,6 @@ ui <- dashboardPage(
             title = "Histogram",
             solidHeader = TRUE,
             collapsible = TRUE,
-            closable = TRUE,
             status = "primary",
             plotOutput(outputId = "histPlot1")
           ),
@@ -58,7 +60,6 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             collapsible = TRUE,
-            closable = TRUE,
             plotOutput(outputId = "histCntrlPlot1"),
             sidebar = boxSidebar(
               id = "hist_sidebar1",
@@ -74,7 +75,6 @@ ui <- dashboardPage(
             id = "plotlyBox1",
             title = "Plotly plot",
             solidHeader = TRUE,
-            closable = TRUE,
             status = "primary",
             collapsible = TRUE,
             plotlyOutput(outputId = "plotlyPlot1")
@@ -85,12 +85,12 @@ ui <- dashboardPage(
       tabItem(
         tabName = "shinyjquiSort",
         fluidRow(
-          actionButton(inputId = "restoreHistogram2",
-                       label = "Histogram"),
-          actionButton(inputId = "restoreHistogramControls2",
-                       label = "Histogram with controls"),
-          actionButton(inputId = "restorePlotly2",
-                       label = "Plotly"),
+          checkboxGroupButtons(inputId = "showPlots2",
+                               label = "Show plots:",
+                               choices = c("Histogram" = "histogram",
+                                           "Histogram with controls" = "histogramCntrl",
+                                           "Plotly" = "plotly"),
+                               selected = c("histogram", "histogramCntrl", "plotly")),
           p("Some times empty space. Can not zoom the plotly plot without moving the plot.")
         ), # end fluidRow 1
         fluidRow(
@@ -102,7 +102,6 @@ ui <- dashboardPage(
                 title = "Histogram",
                 solidHeader = TRUE,
                 collapsible = TRUE,
-                closable = TRUE,
                 status = "primary",
                 plotOutput(outputId = "histPlot2")
               ),
@@ -112,7 +111,6 @@ ui <- dashboardPage(
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                closable = TRUE,
                 plotOutput(outputId = "histCntrlPlot2"),
                 sidebar = boxSidebar(
                   id = "hist_sidebar2",
@@ -128,7 +126,6 @@ ui <- dashboardPage(
                 id = "plotlyBox2",
                 title = "Plotly plot",
                 solidHeader = TRUE,
-                closable = TRUE,
                 status = "primary",
                 collapsible = TRUE,
                 plotlyOutput(outputId = "plotlyPlot2")
@@ -141,12 +138,12 @@ ui <- dashboardPage(
       tabItem(
         tabName = "shinyjquiMovable",
         fluidRow(
-          actionButton(inputId = "restoreHistogram3",
-                       label = "Histogram"),
-          actionButton(inputId = "restoreHistogramControls3",
-                       label = "Histogram with controls"),
-          actionButton(inputId = "restorePlotly3",
-                       label = "Plotly"),
+          checkboxGroupButtons(inputId = "showPlots3",
+                               label = "Show plots:",
+                               choices = c("Histogram" = "histogram",
+                                           "Histogram with controls" = "histogramCntrl",
+                                           "Plotly" = "plotly"),
+                               selected = c("histogram", "histogramCntrl", "plotly")),
           p("Same problem as sortable. Some times empty space. Can not zoom the plotly plot without moving the plot.")
         ), # end fluidRow 1
         fluidRow(
@@ -158,7 +155,6 @@ ui <- dashboardPage(
                 title = "Histogram",
                 solidHeader = TRUE,
                 collapsible = TRUE,
-                closable = TRUE,
                 status = "primary",
                 plotOutput(outputId = "histPlot3")
               ),
@@ -168,7 +164,6 @@ ui <- dashboardPage(
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                closable = TRUE,
                 plotOutput(outputId = "histCntrlPlot3"),
                 sidebar = boxSidebar(
                   id = "hist_sidebar3",
@@ -184,7 +179,6 @@ ui <- dashboardPage(
                 id = "plotlyBox3",
                 title = "Plotly plot",
                 solidHeader = TRUE,
-                closable = TRUE,
                 status = "primary",
                 collapsible = TRUE,
                 plotlyOutput(outputId = "plotlyPlot3")
@@ -197,9 +191,54 @@ ui <- dashboardPage(
       tabItem(
         tabName = "shinyjquiServer",
         fluidRow(
-          p("Server side moving.")
-        )
-      )
+          checkboxGroupButtons(inputId = "showPlots4",
+                               label = "Show plots:",
+                               choices = c("Histogram" = "histogram",
+                                           "Histogram with controls" = "histogramCntrl",
+                                           "Plotly" = "plotly"),
+                               selected = c("histogram", "histogramCntrl", "plotly")),
+          p("test!")
+        ), # end fluidrow 1
+        fluidRow(
+          # show plots
+          box(
+            id = "histogramBox4",
+            title = "Histogram",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            status = "primary",
+            plotOutput(outputId = "histPlot4")
+          ),
+          box(
+            id = "histogramCntrlBox4",
+            title = "Histogram with controls",
+            solidHeader = TRUE,
+            status = "primary",
+            collapsible = TRUE,
+            plotOutput(outputId = "histCntrlPlot4"),
+            sidebar = boxSidebar(
+              id = "hist_sidebar4",
+              width = 40,
+              sliderInput(inputId = "slider4",
+                          label = "Number of observations:",
+                          min = 1,
+                          max = 100,
+                          value = 50)
+            ) # end boxSidebar
+          ),
+          box(
+            id = "plotlyBox4",
+            title = "Plotly plot",
+            solidHeader = TRUE,
+            status = "primary",
+            collapsible = TRUE,
+            checkboxInput(inputId = "plotlyPlotZoom4",
+                          label = "Zoom",
+                          value = TRUE),
+            plotlyOutput(outputId = "plotlyPlot4")
+          )
+        ) # end fluidrow 2
+      ) # end shinyjqServer
     ) # end tabitems
   )
 )
@@ -210,7 +249,45 @@ server <- function(input, output, session) {
   plotly_data <- data.frame(x = 1:100,
                             y = rnorm(100))
   
-  #### buttons for notMovable ####
+  # toggle the plots
+  observe({
+    ## static
+    shinyjs::toggle(id = "histogramBox1",
+                    condition = "histogram" %in% input$showPlots1)
+    shinyjs::toggle(id = "histogramCntrlBox1",
+                    condition = "histogramCntrl" %in% input$showPlots1)
+    shinyjs::toggle(id = "plotlyBox1",
+                    condition = "plotly" %in% input$showPlots1)
+    
+    ## shinyjquiSortable
+    shinyjs::toggle(id = "histogramBox2",
+                    condition = "histogram" %in% input$showPlots2)
+    shinyjs::toggle(id = "histogramCntrlBox2",
+                    condition = "histogramCntrl" %in% input$showPlots2)
+    shinyjs::toggle(id = "plotlyBox2",
+                    condition = "plotly" %in% input$showPlots2)
+    
+    ## shinyjquiMovable
+    shinyjs::toggle(id = "histogramBox3",
+                    condition = "histogram" %in% input$showPlots3)
+    shinyjs::toggle(id = "histogramCntrlBox3",
+                    condition = "histogramCntrl" %in% input$showPlots3)
+    shinyjs::toggle(id = "plotlyBox3",
+                    condition = "plotly" %in% input$showPlots3)
+    
+    ## server
+    shinyjs::toggle(id = "histogramBox4",
+                    condition = "histogram" %in% input$showPlots4)
+    shinyjs::toggle(id = "histogramCntrlBox4",
+                    condition = "histogramCntrl" %in% input$showPlots4)
+    shinyjs::toggle(id = "plotlyBox4",
+                    condition = "plotly" %in% input$showPlots4)
+  })
+  
+  
+  #### Static ####
+  
+  ###### buttons for Static ######
   observeEvent(input$restoreHistogram1, {
     updateBox(id = "histogramBox1",
               action = "restore")
@@ -226,7 +303,7 @@ server <- function(input, output, session) {
               action = "restore")
   })
   
-  #### plots for notMovable ####
+  ###### plots for Static ######
   # histogram
   output$histPlot1 <- renderPlot({
     hist(histdata)
@@ -247,23 +324,11 @@ server <- function(input, output, session) {
     
   })
   
-  #### buttons for shinyjquiSortable ####
-  observeEvent(input$restoreHistogram2, {
-    updateBox(id = "histogramBox2",
-              action = "restore")
-  })
+  #### shinyjquiSortable ####
   
-  observeEvent(input$restoreHistogramControls2, {
-    updateBox(id = "histogramCntrlBox2",
-              action = "restore")
-  })
-  
-  observeEvent(input$restorePlotly2, {
-    updateBox(id = "plotlyBox2",
-              action = "restore")
-  })
-  
-  #### plots for shinyjquiSortable ####
+  ###### buttons for shinyjquiSortable ######
+
+  ###### plots for shinyjquiSortable ######
   # histogram
   output$histPlot2 <- renderPlot({
     hist(histdata)
@@ -284,7 +349,9 @@ server <- function(input, output, session) {
     
   })
   
-  #### buttons for shinyjquiMovable ####
+  #### shinyjquiMovable ####
+  
+  ###### buttons for shinyjquiMovable ######
   observeEvent(input$restoreHistogram3, {
     updateBox(id = "histogramBox3",
               action = "restore")
@@ -300,7 +367,7 @@ server <- function(input, output, session) {
               action = "restore")
   })
   
-  #### plots for shinyjquiMovable ####
+  ###### plots for shinyjquiMovable ######
   # histogram
   output$histPlot3 <- renderPlot({
     hist(histdata)
@@ -320,7 +387,51 @@ server <- function(input, output, session) {
       add_markers()
     
   })
-}
+  
+  #### shinyjquiServer ####
+  
+  ###### buttons for shinyjquiServer ######
+  observeEvent(input$restoreHistogram4, {
+    updateBox(id = "histogramBox4",
+              action = "restore")
+  })
+  
+  observeEvent(input$restoreHistogramControls4, {
+    updateBox(id = "histogramCntrlBox4",
+              action = "restore")
+  })
+  
+  observeEvent(input$restorePlotly4, {
+    updateBox(id = "plotlyBox4",
+              action = "restore")
+  })
+  
+  ###### plots for shinyjquiServer ######
+  # histogram
+  output$histPlot4 <- renderPlot({
+    hist(histdata)
+  })
+  
+  # histogram with controls
+  output$histCntrlPlot4 <- renderPlot({
+    data <- histdata[seq_len(input$slider4)]
+    hist(data)
+  })
+  
+  # plotly plot
+  output$plotlyPlot4 <- renderPlotly({
+    plotly_data |>
+      plot_ly(x = ~x,
+              y = ~y) |>
+      add_markers() |> 
+      # activate / deactivate zooming
+      layout(xaxis = list(fixedrange = !input$plotlyPlotZoom4), 
+             yaxis = list(fixedrange = !input$plotlyPlotZoom4)) |> 
+      config(displayModeBar = input$plotlyPlotZoom4)
+    
+  })
+  
+} # end server
 
 
 # run everything
