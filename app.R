@@ -15,8 +15,8 @@ ui <- dashboardPage(
       menuItem(text = "Dummy", 
                tabName = "Dummy", 
                icon = icon("file-excel")),
-      menuItem(text = "shinyjqui Server side",
-               tabName = "shinyjquiServer",
+      menuItem(text = "Visualisation",
+               tabName = "visualisation",
                icon = icon("bar-chart-o"))
     )
   ),
@@ -32,11 +32,11 @@ ui <- dashboardPage(
       ),
       
       tabItem(
-        tabName = "shinyjquiServer",
+        tabName = "visualisation",
         fluidRow(
           column(
             width = 4,
-            checkboxGroupButtons(inputId = "showPlots4",
+            checkboxGroupButtons(inputId = "showPlots",
                                  label = "Show plots:",
                                  choices = c("Histogram" = "histogram",
                                              "Histogram with controls" = "histogramCntrl",
@@ -68,20 +68,20 @@ server <- function(input, output, session) {
   
   ###### plots for shinyjquiServer ######
   # histogram
-  output$histPlot4 <- renderPlot({
+  output$histPlot <- renderPlot({
     hist(histdata)
   })
   
   # histogram with controls
-  output$histCntrlPlot4 <- renderPlot({
-    data <- histdata[seq_len(input$slider4)]
+  output$histCntrlPlot <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
     hist(data)
   })
   
   # plotly plot
-  output$plotlyPlot4 <- renderPlotly({
+  output$plotlyPlot <- renderPlotly({
     # needed to make the plotly graph resize with the size of the box
-    req(input$showPlots4)
+    req(input$showPlots)
     
     plotly_data |>
       plot_ly(x = ~x,
@@ -94,10 +94,10 @@ server <- function(input, output, session) {
   
   # calculate the width
   boxWidth <- reactive({
-    req(input$showPlots4)
-    # use observe otherwise I can not see that input$showPlot4 is empty.
+    req(input$showPlots)
+    # use observe otherwise I can not see that input$showPlot is empty.
     boxWidth <- switch(
-      as.character(length(input$showPlots4)),
+      as.character(length(input$showPlots)),
       "1" = 12,
       "2" = 6,
       "3" = 6
@@ -113,33 +113,33 @@ server <- function(input, output, session) {
     tagList(
       fluidRow(
         # show plots
-        div(id = "divPlots4",
-            if("histogram" %in% input$showPlots4) {
+        div(id = "divPlots",
+            if("histogram" %in% input$showPlots) {
               box(
-                id = "histogramBox4",
+                id = "histogramBox",
                 title = "Histogram",
                 width = boxWidth(),
                 solidHeader = TRUE,
                 collapsible = TRUE,
                 status = "primary",
-                plotOutput(outputId = "histPlot4")
+                plotOutput(outputId = "histPlot")
               )
             } else {
               NULL
             }, 
-            if("histogramCntrl" %in% input$showPlots4) {
+            if("histogramCntrl" %in% input$showPlots) {
               box(
-                id = "histogramCntrlBox4",
+                id = "histogramCntrlBox",
                 title = "Histogram with controls",
                 width = boxWidth(),
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                plotOutput(outputId = "histCntrlPlot4"),
+                plotOutput(outputId = "histCntrlPlot"),
                 sidebar = boxSidebar(
-                  id = "hist_sidebar4",
+                  id = "hist_sidebar",
                   width = 40,
-                  sliderInput(inputId = "slider4",
+                  sliderInput(inputId = "slider",
                               label = "Number of observations:",
                               min = 1,
                               max = 100,
@@ -149,15 +149,15 @@ server <- function(input, output, session) {
             } else {
               NULL
             },
-            if("plotly" %in% input$showPlots4) {
+            if("plotly" %in% input$showPlots) {
               box(
-                id = "plotlyBox4",
+                id = "plotlyBox",
                 title = "Plotly plot",
                 width = boxWidth(),
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                plotlyOutput(outputId = "plotlyPlot4")
+                plotlyOutput(outputId = "plotlyPlot")
               )
             } else {
               NULL
@@ -171,10 +171,10 @@ server <- function(input, output, session) {
   observeEvent(input$moveZoomPlots, {
     
     if (input$moveZoomPlots == "zoom") {
-      jqui_sortable(ui = "#divPlots4",
+      jqui_sortable(ui = "#divPlots",
                     operation = "disable")
     } else {
-      jqui_sortable(ui = "#divPlots4",
+      jqui_sortable(ui = "#divPlots",
                     operation = "enable")
     }
   })
