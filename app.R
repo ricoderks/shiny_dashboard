@@ -199,45 +199,8 @@ ui <- dashboardPage(
                                selected = c("histogram", "histogramCntrl", "plotly")),
           p("test!")
         ), # end fluidrow 1
-        fluidRow(
-          # show plots
-          box(
-            id = "histogramBox4",
-            title = "Histogram",
-            solidHeader = TRUE,
-            collapsible = TRUE,
-            status = "primary",
-            plotOutput(outputId = "histPlot4")
-          ),
-          box(
-            id = "histogramCntrlBox4",
-            title = "Histogram with controls",
-            solidHeader = TRUE,
-            status = "primary",
-            collapsible = TRUE,
-            plotOutput(outputId = "histCntrlPlot4"),
-            sidebar = boxSidebar(
-              id = "hist_sidebar4",
-              width = 40,
-              sliderInput(inputId = "slider4",
-                          label = "Number of observations:",
-                          min = 1,
-                          max = 100,
-                          value = 50)
-            ) # end boxSidebar
-          ),
-          box(
-            id = "plotlyBox4",
-            title = "Plotly plot",
-            solidHeader = TRUE,
-            status = "primary",
-            collapsible = TRUE,
-            checkboxInput(inputId = "plotlyPlotZoom4",
-                          label = "Zoom",
-                          value = TRUE),
-            plotlyOutput(outputId = "plotlyPlot4")
-          )
-        ) # end fluidrow 2
+        uiOutput(outputId = "uiPlots")
+        
       ) # end shinyjqServer
     ) # end tabitems
   )
@@ -276,12 +239,12 @@ server <- function(input, output, session) {
                     condition = "plotly" %in% input$showPlots3)
     
     ## server
-    shinyjs::toggle(id = "histogramBox4",
-                    condition = "histogram" %in% input$showPlots4)
-    shinyjs::toggle(id = "histogramCntrlBox4",
-                    condition = "histogramCntrl" %in% input$showPlots4)
-    shinyjs::toggle(id = "plotlyBox4",
-                    condition = "plotly" %in% input$showPlots4)
+    # shinyjs::toggle(id = "histogramBox4",
+    #                 condition = "histogram" %in% input$showPlots4)
+    # shinyjs::toggle(id = "histogramCntrlBox4",
+    #                 condition = "histogramCntrl" %in% input$showPlots4)
+    # shinyjs::toggle(id = "plotlyBox4",
+    #                 condition = "plotly" %in% input$showPlots4)
   })
   
   
@@ -373,13 +336,86 @@ server <- function(input, output, session) {
     plotly_data |>
       plot_ly(x = ~x,
               y = ~y) |>
-      add_markers() |> 
-      # activate / deactivate zooming
-      layout(xaxis = list(fixedrange = !input$plotlyPlotZoom4), 
-             yaxis = list(fixedrange = !input$plotlyPlotZoom4)) |> 
-      config(displayModeBar = input$plotlyPlotZoom4)
-    
+      add_markers() 
   })
+  
+  # auto resize
+  boxWidth <- reactive({
+    # use observe otherwise I can not see that input$showPlot4 is empty.
+    boxWidth <- switch(
+      as.character(length(input$showPlots4)),
+      "1" = 12,
+      "2" = 6,
+      "3" = 6
+    )
+    
+    return(boxWidth)
+  })
+  
+  output$uiPlots <- renderUI({
+    req(boxWidth)
+    
+    tagList(
+      fluidRow(
+        # show plots
+        if("histogram" %in% input$showPlots4) {
+          box(
+            id = "histogramBox4",
+            title = "Histogram",
+            width = boxWidth(),
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            status = "primary",
+            plotOutput(outputId = "histPlot4")
+          )
+        } else {
+          NULL
+        }, 
+        if("histogramCntrl" %in% input$showPlots4) {
+          box(
+            id = "histogramCntrlBox4",
+            title = "Histogram with controls",
+            width = boxWidth(),
+            solidHeader = TRUE,
+            status = "primary",
+            collapsible = TRUE,
+            plotOutput(outputId = "histCntrlPlot4"),
+            sidebar = boxSidebar(
+              id = "hist_sidebar4",
+              width = 40,
+              sliderInput(inputId = "slider4",
+                          label = "Number of observations:",
+                          min = 1,
+                          max = 100,
+                          value = 50)
+            ) # end boxSidebar
+          )
+        } else {
+          NULL
+        },
+        if("plotly" %in% input$showPlots4) {
+          box(
+            id = "plotlyBox4",
+            title = "Plotly plot",
+            width = boxWidth(),
+            solidHeader = TRUE,
+            status = "primary",
+            collapsible = TRUE,
+            checkboxInput(inputId = "plotlyPlotZoom4",
+                          label = "Zoom",
+                          value = TRUE),
+            plotlyOutput(outputId = "plotlyPlot4")
+          )
+        } else {
+          NULL
+        }
+      ) # end fluidrow 2
+    )
+  })
+  
+  # make the plots draggable
+  jqui_draggable(ui = "#histogramBox4, #histogramCntrlBox4, #plotlyBox4",
+                 operation = "enable")
   
 } # end server
 
