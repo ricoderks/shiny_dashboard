@@ -287,22 +287,6 @@ server <- function(input, output, session) {
   
   #### Static ####
   
-  ###### buttons for Static ######
-  observeEvent(input$restoreHistogram1, {
-    updateBox(id = "histogramBox1",
-              action = "restore")
-  })
-  
-  observeEvent(input$restoreHistogramControls1, {
-    updateBox(id = "histogramCntrlBox1",
-              action = "restore")
-  })
-  
-  observeEvent(input$restorePlotly1, {
-    updateBox(id = "plotlyBox1",
-              action = "restore")
-  })
-  
   ###### plots for Static ######
   # histogram
   output$histPlot1 <- renderPlot({
@@ -326,8 +310,6 @@ server <- function(input, output, session) {
   
   #### shinyjquiSortable ####
   
-  ###### buttons for shinyjquiSortable ######
-
   ###### plots for shinyjquiSortable ######
   # histogram
   output$histPlot2 <- renderPlot({
@@ -351,22 +333,6 @@ server <- function(input, output, session) {
   
   #### shinyjquiMovable ####
   
-  ###### buttons for shinyjquiMovable ######
-  observeEvent(input$restoreHistogram3, {
-    updateBox(id = "histogramBox3",
-              action = "restore")
-  })
-  
-  observeEvent(input$restoreHistogramControls3, {
-    updateBox(id = "histogramCntrlBox3",
-              action = "restore")
-  })
-  
-  observeEvent(input$restorePlotly3, {
-    updateBox(id = "plotlyBox3",
-              action = "restore")
-  })
-  
   ###### plots for shinyjquiMovable ######
   # histogram
   output$histPlot3 <- renderPlot({
@@ -389,22 +355,6 @@ server <- function(input, output, session) {
   })
   
   #### shinyjquiServer ####
-  
-  ###### buttons for shinyjquiServer ######
-  observeEvent(input$restoreHistogram4, {
-    updateBox(id = "histogramBox4",
-              action = "restore")
-  })
-  
-  observeEvent(input$restoreHistogramControls4, {
-    updateBox(id = "histogramCntrlBox4",
-              action = "restore")
-  })
-  
-  observeEvent(input$restorePlotly4, {
-    updateBox(id = "plotlyBox4",
-              action = "restore")
-  })
   
   ###### plots for shinyjquiServer ######
   # histogram
