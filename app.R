@@ -23,11 +23,27 @@ ui <- dashboardPage(
   
   #### body ####
   dashboardBody(
+    # determine the size of the browser window
+    tags$head(tags$script('
+            var dimension = [0, 0];
+            $(document).on("shiny:connected", function(e) {
+              dimension[0] = window.innerWidth;
+              dimension[1] = window.innerHeight;
+              Shiny.onInputChange("dimension", dimension);
+            });
+            $(window).resize(function(e) {
+              dimension[0] = window.innerWidth;
+              dimension[1] = window.innerHeight;
+              Shiny.onInputChange("dimension", dimension);
+            });
+            ')),
+    
     tabItems(
       tabItem(
         tabName = "Dummy",
         fluidRow(
-          p("Load files here")
+          p("Load files here"),
+          verbatimTextOutput("dimension_display")
         )
       ),
       
@@ -64,9 +80,52 @@ server <- function(input, output, session) {
   plotly_data <- data.frame(x = 1:100,
                             y = rnorm(100))
   
+  boxDimension <- reactiveValues(width = NULL,
+                                 height = NULL)
+  
+  output$dimension_display <- renderText({
+    paste("width:", input$dimension[1], "| height:", input$dimension[2], "\n",
+          boxDimension$width, boxDimension$height)
+  })
+  
+  # set the dimensions of the boxes
+  observe({
+    boxWidth <- switch(
+      as.character(length(input$showPlots)),
+      "1" = 12,
+      "2" = 6,
+      "3" = 6
+    )
+    
+    boxHeight <- switch(
+      # newHeight = windowHeight - header - buttons - margin
+      as.character(length(input$showPlots)),
+      "1" = paste0(input$dimension[2] - 50 - 125 - 50, "px"),
+      "2" = paste0(input$dimension[2] - 50 - 125 - 50, "px"),
+      "3" = paste0((input$dimension[2] - 50 - 225 - 50) / 2, "px")
+    )
+    
+    boxDimension$width <- boxWidth
+    boxDimension$height <- boxHeight
+  })
+  
+  # calculate the width
+  boxWidth <- reactive({
+    req(input$showPlots)
+    # use observe otherwise I can not see that input$showPlot is empty.
+    boxWidth <- switch(
+      as.character(length(input$showPlots)),
+      "1" = 12,
+      "2" = 6,
+      "3" = 6
+    )
+    
+    return(boxWidth)
+  })
+  
   #### shinyjquiServer ####
   
-  ###### plots for shinyjquiServer ######
+  ###### plots" for shinyjquiServer ######
   # histogram
   output$histPlot <- renderPlot({
     hist(histdata)
@@ -92,23 +151,9 @@ server <- function(input, output, session) {
              yaxis = list(fixedrange = input$moveZoomPlots == "move"))
   })
   
-  # calculate the width
-  boxWidth <- reactive({
-    req(input$showPlots)
-    # use observe otherwise I can not see that input$showPlot is empty.
-    boxWidth <- switch(
-      as.character(length(input$showPlots)),
-      "1" = 12,
-      "2" = 6,
-      "3" = 6
-    )
-    
-    return(boxWidth)
-  })
-  
   # render all plots
   output$uiPlots <- renderUI({
-    req(boxWidth)
+    req(boxDimension)
     
     tagList(
       fluidRow(
@@ -118,11 +163,12 @@ server <- function(input, output, session) {
               box(
                 id = "histogramBox",
                 title = "Histogram",
-                width = boxWidth(),
+                width = boxDimension$width,
                 solidHeader = TRUE,
                 collapsible = TRUE,
                 status = "primary",
-                plotOutput(outputId = "histPlot")
+                plotOutput(outputId = "histPlot",
+                           height = boxDimension$height)
               )
             } else {
               NULL
@@ -131,11 +177,12 @@ server <- function(input, output, session) {
               box(
                 id = "histogramCntrlBox",
                 title = "Histogram with controls",
-                width = boxWidth(),
+                width = boxDimension$width,
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                plotOutput(outputId = "histCntrlPlot"),
+                plotOutput(outputId = "histCntrlPlot",
+                           height = boxDimension$height),
                 sidebar = boxSidebar(
                   id = "hist_sidebar",
                   width = 40,
@@ -153,11 +200,12 @@ server <- function(input, output, session) {
               box(
                 id = "plotlyBox",
                 title = "Plotly plot",
-                width = boxWidth(),
+                width = boxDimension$width,
                 solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
-                plotlyOutput(outputId = "plotlyPlot")
+                plotlyOutput(outputId = "plotlyPlot",
+                             height = boxDimension$height)
               )
             } else {
               NULL
