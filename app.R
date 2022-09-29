@@ -83,6 +83,8 @@ server <- function(input, output, session) {
   boxDimension <- reactiveValues(width = NULL,
                                  height = NULL)
   
+  # for debugging output the dimensions of the window and the calculated dimensions 
+  # of the boxes (plots)
   output$dimension_display <- renderText({
     paste("width:", input$dimension[1], "| height:", input$dimension[2], "\n",
           boxDimension$width, boxDimension$height)
@@ -160,6 +162,7 @@ server <- function(input, output, session) {
         # show plots
         div(id = "divPlots",
             if("histogram" %in% input$showPlots) {
+              # !!insteadd of setting the box height, set the plot height!!
               box(
                 id = "histogramBox",
                 title = "Histogram",
@@ -174,6 +177,7 @@ server <- function(input, output, session) {
               NULL
             }, 
             if("histogramCntrl" %in% input$showPlots) {
+              # !!insteadd of setting the box height, set the plot height!!
               box(
                 id = "histogramCntrlBox",
                 title = "Histogram with controls",
@@ -197,6 +201,7 @@ server <- function(input, output, session) {
               NULL
             },
             if("plotly" %in% input$showPlots) {
+              # !!insteadd of setting the box height, set the plot height!!
               box(
                 id = "plotlyBox",
                 title = "Plotly plot",
